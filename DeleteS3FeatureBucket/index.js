@@ -44,21 +44,32 @@ async function handleWebhookEvent(webhookBody) {
     return { statusCode: 200, body: message };
 }
 
-exports.handler = async (event, context) => {
+module.exports.handler = async (event, context) => {
     console.log(`Event: ${JSON.stringify(event, null, 2)}`);
+    let response;
 
     if (!event.body) {
-        const response = { statusCode: 403, body: 'Missing event body' };
+        response = { statusCode: 403, body: 'Missing event body' };
         console.log(`Response: ${JSON.stringify(response, null, 2)}`);
         return response;
     }
 
     // Parse the message body from the Lambda proxy
-    const body = JSON.parse(event.body);
+    let body;
+
+    try {
+      body = JSON.parse(event.body);
+    } catch (e) {
+      console.log(`Request Event Body is not JSON: ${event.body}`)
+      console.log(`Error: ${e}`)
+      response = { statusCode: 200, body: 'Event body is not JSON, Ignoring event' };
+      return response
+    }
+
     console.log(`Event body: ${JSON.stringify(body, null, 2)}`);
 
     // Handle the webhook event
-    const response = await handleWebhookEvent(body);
+    response = await handleWebhookEvent(body);
 
     console.log(`Response: ${JSON.stringify(response, null, 2)}`);
     return response;
