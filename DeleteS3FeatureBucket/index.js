@@ -12,14 +12,13 @@ async function handleWebhookEvent(webhookBody) {
     }
 
     const branchName = pullRequest['head']['ref'];
-    const merged = pullRequest['merged'];
+    const repoName = pullRequest['head']['repo']['name'];
 
     console.log({action});
-    console.log({merged});
     console.log({branchName});
 
-    if(action === 'closed' && (merged || merged === 'true') && branchName != 'master') {
-        const bucket = `${branchName}-baloo`;
+    if(action === 'closed' && branchName != 'master') {
+        const bucket = `${branchName}-${repoName}`;
         let objects;
 
         // List all object keys in the bucket
