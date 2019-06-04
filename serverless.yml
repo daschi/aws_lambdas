@@ -44,7 +44,14 @@ provider:
             - "/*"
     - Effect: "Allow"
       Action:
+        - "cloudformation:*"
+        - "iam:DeleteRole"
+        - "iam:DeleteRolePolicy"
+        - "iam:DetachRolePolicy"
+        - "lambda:DeleteFunction"
+        - "lambda:InvokeFunction"
         - "s3:*"
+        - "states:DeleteStateMachine"
       Resource: "*"
 
 # you can define service wide environment variables here
@@ -70,6 +77,13 @@ functions:
     events:
       - http:
           path: DeleteS3FeatureBucket
+          method: ANY
+  DeleteCFStack:
+    handler: DeleteCFStack/index.handler
+    description: API endpoint for Github webhook to delete CloudFormation stacks on PR merges
+    events:
+      - http:
+          path: DeleteCFStack
           method: ANY
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

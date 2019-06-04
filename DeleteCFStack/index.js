@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
+const cf = new AWS.CloudFormation();
 
 async function handleWebhookEvent(webhookBody) {
     const action = webhookBody['action'];
@@ -18,25 +18,10 @@ async function handleWebhookEvent(webhookBody) {
     console.log({branchName});
 
     if(action === 'closed' && branchName != 'master') {
-        const bucket = `${branchName}-${repoName}`;
-        let objects;
-
-        // List all object keys in the bucket
-        try {
-          let response = await s3.listObjects({Bucket: bucket}).promise();
-          objects = response['Contents'].map((object) => { return { 'Key': object['Key'] } });
-        } catch (e) {
-          console.log(e);
-          throw new Error(e);
-        }
-
-        console.log({objects});
-
-        // Delete all the objects from the bucket
-        await s3.deleteObjects({Bucket: bucket, Delete: { Objects: objects }}).promise();
-        // Delete the bucket
-        await s3.deleteBucket({Bucket: bucket}).promise();
-        message = `S3 bucket deleted: ${bucket}`;
+        const stackName = `${branchName}-${repoName}`;
+        // Delete the stack
+        await cf.deleteStack({StackName: stackName}).promise();
+        message = `CloudFormation Stack deleted: ${stackName}`;
     } else {
         message = "Pull request event ignored";
     }
