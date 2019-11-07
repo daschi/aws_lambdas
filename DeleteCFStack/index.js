@@ -18,10 +18,14 @@ async function handleWebhookEvent(webhookBody) {
     console.log({branchName});
 
     if(action === 'closed' && branchName != 'master') {
-        const stackName = `${branchName}-${repoName}`;
-        // Delete the stack
-        await cf.deleteStack({StackName: stackName}).promise();
-        message = `CloudFormation Stack deleted: ${stackName}`;
+        const stackNameRepo = `${branchName}-${repoName}`;
+        const stackNameDev = `${stackNameRepo}-dev`;
+        const stackNameTest = `${stackNameRepo}-test`;
+        // Delete the stacks
+        await cf.deleteStack({StackName: stackNameRepo}).promise();
+        await cf.deleteStack({StackName: stackNameDev}).promise();
+        await cf.deleteStack({StackName: stackNameTest}).promise();
+        message = `CloudFormation Stacks deleted: ${stackNameRepo}, ${stackNameDev}, ${stackNameTest}`;
     } else {
         message = "Pull request event ignored";
     }
