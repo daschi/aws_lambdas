@@ -23,7 +23,7 @@ async function deleteS3Bucket(bucket) {
   return message = `S3 bucket deleted: ${bucket}`;
 };
 
-function parsewebhookBody(eventType, webhookBody) {
+function parseWebhookBody(eventType, webhookBody) {
   let shouldDeleteBucket, branchName, repoName;
 
   if (eventType === 'pull_request') {
@@ -46,7 +46,7 @@ async function handleWebhookEvent(eventType, webhookBody) {
     return { statusCode: 200, message: message };
   }
 
-  const { shouldDeleteBucket, branchName, repoName } = parsewebhookBody(eventType, webhookBody);
+  const { shouldDeleteBucket, branchName, repoName } = parseWebhookBody(eventType, webhookBody);
 
   if (!shouldDeleteBucket) {
     const message = `Event should not delete bucket: shouldDeleteBucket: ${shouldDeleteBucket}, eventType: ${eventType}`;

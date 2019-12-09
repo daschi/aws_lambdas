@@ -1,13 +1,13 @@
 const AWS = require('aws-sdk');
 const cf = new AWS.CloudFormation();
 
-function parsewebhookBody(eventType, webhookBody) {
+function parseWebhookBody(eventType, webhookBody) {
   let shouldDeleteStack, branchName, repoName;
 
   if (eventType === 'pull_request') {
     branchName = webhookBody['pull_request']['head']['ref'];
     repoName = webhookBody['pull_request']['head']['repo']['name'];
-    shouldDeleteStack = webhookBody['action'] === 'closed' && branchName != 'master'
+    shouldDeleteStack = webhookBody['action'] === 'closed' && branchName !== 'master';
   } else if (eventType === 'delete') {
     branchName = webhookBody['ref'];
     repoName = webhookBody['repository']['name'];
@@ -25,7 +25,7 @@ async function handleWebhookEvent(eventType, webhookBody) {
     return { statusCode: 200, message: message };
   }
 
-  const { shouldDeleteStack, stackName } = parsewebhookBody(eventType, webhookBody);
+  const { shouldDeleteStack, stackName } = parseWebhookBody(eventType, webhookBody);
 
   if (!shouldDeleteStack) {
     const message = `Event should not delete stack: shouldDeleteStack: ${shouldDeleteStack}, eventType: ${eventType}`;
@@ -46,7 +46,7 @@ async function handleWebhookEvent(eventType, webhookBody) {
 module.exports.handler = async (event, context) => {
   console.log(`Event: ${JSON.stringify(event, null, 2)}`);
   let response;
-
+parseWebhookBody
   if (!event.body) {
       response = { statusCode: 403, body: 'Missing event body' };
       console.log(`Response: ${JSON.stringify(response, null, 2)}`);
