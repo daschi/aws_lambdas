@@ -43,18 +43,18 @@ function parseWebhookBody(eventType, webhookBody) {
 async function handleWebhookEvent(eventType, webhookBody) {
   if (!['pull_request', 'delete'].includes(eventType)) {
     const message = `Event ignored. Event type: ${eventType}`;
-    return { statusCode: 200, message: message };
+    return { statusCode: 200, body: message };
   }
 
   const { shouldDeleteBucket, branchName, repoName } = parseWebhookBody(eventType, webhookBody);
 
   if (!shouldDeleteBucket) {
     const message = `Event should not delete bucket: shouldDeleteBucket: ${shouldDeleteBucket}, eventType: ${eventType}`;
-    return { statusCode: 200, message: message };
+    return { statusCode: 200, body: message };
   } else {
     const bucket = `${branchName}-${repoName}`;
     message = await deleteS3Bucket(bucket);
-    return { statusCode: 200,  message: message };
+    return { statusCode: 200,  body: message };
   }
 };
 

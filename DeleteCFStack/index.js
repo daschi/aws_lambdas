@@ -22,14 +22,14 @@ function parseWebhookBody(eventType, webhookBody) {
 async function handleWebhookEvent(eventType, webhookBody) {
   if(!['pull_request', 'delete'].includes(eventType)) {
     const message = `Event ignored. Event type: ${eventType}`;
-    return { statusCode: 200, message: message };
+    return { statusCode: 200, body: message };
   }
 
   const { shouldDeleteStack, stackName } = parseWebhookBody(eventType, webhookBody);
 
   if (!shouldDeleteStack) {
     const message = `Event should not delete stack: shouldDeleteStack: ${shouldDeleteStack}, eventType: ${eventType}`;
-    return { statusCode: 200, message: message };
+    return { statusCode: 200, body: message };
   } else {
     // Delete the stacks
     const stackNameDev = `${stackName}-dev`;
@@ -39,7 +39,7 @@ async function handleWebhookEvent(eventType, webhookBody) {
     await cf.deleteStack({StackName: stackNameDev}).promise();
 
     const message = `CloudFormation Stacks deleted: ${stackName}, ${stackNameDev}, ${stackNameTest}`;
-    return { statusCode: 200, message: message };
+    return { statusCode: 200, body: message };
   }
 };
 
