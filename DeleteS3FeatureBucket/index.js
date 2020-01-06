@@ -4,7 +4,6 @@ const s3 = new AWS.S3();
 async function deleteS3Bucket(bucket) {
   let objects;
 
-  // List all object keys in the bucket
   try {
     let response = await s3.listObjects({Bucket: bucket}).promise();
     objects = response['Contents'].map((object) => { return { 'Key': object['Key'] } });
@@ -13,14 +12,13 @@ async function deleteS3Bucket(bucket) {
     throw new Error(e);
   }
 
-  console.log({objects});
+  if(objects.length > 0) {
+    console.log(`deleting contents for bucket ${bucket}`);
+    await s3.deleteObjects({Bucket: bucket, Delete: { Objects: objects }}).promise();
+  }
 
-  // Delete all the objects from the bucket
-  await s3.deleteObjects({Bucket: bucket, Delete: { Objects: objects }}).promise();
-  // Delete the bucket
+  console.log(`deleting bucket ${bucket}`);
   await s3.deleteBucket({Bucket: bucket}).promise();
-
-  return message = `S3 bucket deleted: ${bucket}`;
 };
 
 function parseWebhookBody(eventType, webhookBody) {
@@ -40,6 +38,21 @@ function parseWebhookBody(eventType, webhookBody) {
   return { shouldDeleteBucket, branchName, repoName };
 }
 
+function allBucketsByRepo(branchName, repoName) {
+  let buckets = [];
+  if (repoName === 'hobbes') {
+    buckets = [
+      `${branchName}-${repoName}`,
+      `${branchName}-dev`,
+      `${branchName}-test`
+    ];
+  } else {
+    // baloo repo only has one bucket
+    buckets.push(`${branchName}-${repoName}`);
+  }
+  return buckets;
+};
+
 async function handleWebhookEvent(eventType, webhookBody) {
   if (!['pull_request', 'delete'].includes(eventType)) {
     const message = `Event ignored. Event type: ${eventType}`;
@@ -49,11 +62,14 @@ async function handleWebhookEvent(eventType, webhookBody) {
   const { shouldDeleteBucket, branchName, repoName } = parseWebhookBody(eventType, webhookBody);
 
   if (!shouldDeleteBucket) {
-    const message = `Event should not delete bucket: shouldDeleteBucket: ${shouldDeleteBucket}, eventType: ${eventType}`;
+    const message = `Event should not delete bucket(s): shouldDeleteBucket: ${shouldDeleteBucket}, eventType: ${eventType}`;
     return { statusCode: 200, body: message };
   } else {
-    const bucket = `${branchName}-${repoName}`;
-    message = await deleteS3Bucket(bucket);
+    const buckets = allBucketsByRepo(branchName, repoName);
+    for (bucket of buckets) {
+      await deleteS3Bucket(bucket);
+    }
+    message = `${buckets.join(', ')} bucket(s) deleted`;
     return { statusCode: 200,  body: message };
   }
 };
@@ -63,9 +79,9 @@ module.exports.handler = async (event, context) => {
   let response;
 
   if (!event.body) {
-      response = { statusCode: 403, body: 'Missing event body' };
-      console.log(`Response: ${JSON.stringify(response, null, 2)}`);
-      return response;
+    response = { statusCode: 403, body: 'Missing event body' };
+    console.log(`Response: ${JSON.stringify(response, null, 2)}`);
+    return response;
   }
 
   let body;

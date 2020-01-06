@@ -36,7 +36,7 @@ async function handleWebhookEvent(eventType, webhookBody) {
     const stackNameTest = `${stackName}-test`;
     await cf.deleteStack({StackName: stackName}).promise();
     await cf.deleteStack({StackName: stackNameDev}).promise();
-    await cf.deleteStack({StackName: stackNameDev}).promise();
+    await cf.deleteStack({StackName: stackNameTest}).promise();
 
     const message = `CloudFormation Stacks deleted: ${stackName}, ${stackNameDev}, ${stackNameTest}`;
     return { statusCode: 200, body: message };
