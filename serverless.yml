@@ -19,7 +19,7 @@ service: daschi-aws-lambdas # NOTE: update this with your service name
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
   timeout: 30
 # you can overwrite defaults here
 #  stage: dev
