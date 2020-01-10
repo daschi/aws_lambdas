@@ -15,10 +15,12 @@ async function deleteS3Bucket(bucket) {
   if(objects.length > 0) {
     console.log(`deleting contents for bucket ${bucket}`);
     await s3.deleteObjects({Bucket: bucket, Delete: { Objects: objects }}).promise();
+    console.log(`deleting bucket ${bucket}`);
+    await s3.deleteBucket({Bucket: bucket}).promise();
+  } else {
+    console.log(`deleting bucket ${bucket}`);
+    await s3.deleteBucket({Bucket: bucket}).promise();
   }
-
-  console.log(`deleting bucket ${bucket}`);
-  await s3.deleteBucket({Bucket: bucket}).promise();
 };
 
 function parseWebhookBody(eventType, webhookBody) {
