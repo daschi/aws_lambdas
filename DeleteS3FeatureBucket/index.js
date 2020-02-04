@@ -90,12 +90,11 @@ async function handleWebhookEvent(eventType, webhookBody) {
     const message = `Event should not delete bucket(s): shouldDeleteBucket: ${shouldDeleteBucket}, eventType: ${eventType}`;
     return constructResponse(200, message);
   } else {
-    console.log('else branch of handleWebhookEvent');
     const buckets = await allBucketsByRepo(branchName, repoName);
     for (bucket of buckets) {
       await deleteS3Bucket(bucket);
     };
-    const message = `${buckets.join(', ')} bucket(s) deleted`;
+    const message = buckets.length > 0 ? `${buckets.join(', ')} bucket(s) deleted` : 'no buckets to delete';
     return constructResponse(200, message);
   };
 };
