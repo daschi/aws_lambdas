@@ -18,8 +18,8 @@
   "homepage": "https://github.com/daschi/aws_lambdas#readme",
   "dependencies": {
     "aws-sdk": "^2.461.0",
-    "serverless": "^1.60.5",
+    "serverless": "^4.4.10",
     "serverless-http": "^2.3.0",
-    "serverless-offline": "^5.12.1"
+    "serverless-offline": "^14.3.4"
   }
 }
